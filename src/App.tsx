@@ -131,18 +131,29 @@ export default function App() {
     return localStorage.getItem('adminPass') || '';
   });
   const [showLogin, setShowLogin] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [showEmail, setShowEmail] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  const adminEmail = 'sadat310710@gmail.com';
+
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText(adminEmail);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     localStorage.setItem('isAdmin', isAdmin.toString());
     localStorage.setItem('adminPass', adminPass);
   }, [isAdmin, adminPass]);
+
   const [videos, setVideos] = useState<Video[]>([]);
   const [newVideoUrl, setNewVideoUrl] = useState('');
   const [newVideoTitle, setNewVideoTitle] = useState('');
   const [editingVideo, setEditingVideo] = useState<Video | null>(null);
-  const [showWelcome, setShowWelcome] = useState(true);
 
   useEffect(() => {
     if (showWelcome) {
@@ -426,18 +437,48 @@ export default function App() {
         animate={{ opacity: 1, x: 0 }}
         className="fixed top-4 right-4 z-50"
       >
-        <button 
-          onClick={() => {
-            window.location.href = 'mailto:sadat310710@gmail.com';
-          }}
-          title="Send Email to sadat310710@gmail.com"
-          className="flex items-center gap-2 bg-terminal-bg/80 backdrop-blur-md border border-neon-green/30 px-3 py-2 rounded-full hover:border-neon-green hover:bg-neon-green/10 transition-all group cursor-pointer"
-        >
-          <span className="text-[10px] font-bold uppercase tracking-widest hidden sm:inline group-hover:text-white transition-colors">Contact Admin</span>
-          <div className="p-1.5 bg-neon-green/20 rounded-full group-hover:bg-neon-green group-hover:text-black transition-all">
-            <Mail className="w-4 h-4" />
-          </div>
-        </button>
+        <div className="flex flex-col items-end gap-2">
+          <button 
+            onClick={() => setShowEmail(!showEmail)}
+            title={showEmail ? "Hide Email" : "Show Admin Email"}
+            className="flex items-center gap-2 bg-terminal-bg/80 backdrop-blur-md border border-neon-green/30 px-3 py-2 rounded-full hover:border-neon-green hover:bg-neon-green/10 transition-all group cursor-pointer"
+          >
+            <span className="text-[10px] font-bold uppercase tracking-widest hidden sm:inline group-hover:text-white transition-colors">
+              {showEmail ? "Close Info" : "Contact Admin"}
+            </span>
+            <div className="p-1.5 bg-neon-green/20 rounded-full group-hover:bg-neon-green group-hover:text-black transition-all">
+              <Mail className="w-4 h-4" />
+            </div>
+          </button>
+          
+          <AnimatePresence>
+            {showEmail && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                className="bg-black/90 border border-neon-green/50 p-3 rounded-lg shadow-[0_0_20px_rgba(0,255,65,0.2)] backdrop-blur-md flex flex-col gap-2 min-w-[200px]"
+              >
+                <div className="text-[10px] text-white/40 uppercase tracking-widest border-b border-neon-green/20 pb-1">Admin Contact</div>
+                <div className="text-xs text-neon-green font-mono break-all">{adminEmail}</div>
+                <div className="flex gap-2 mt-1">
+                  <button 
+                    onClick={handleCopyEmail}
+                    className="flex-1 bg-neon-green/10 hover:bg-neon-green/20 border border-neon-green/30 py-1 rounded text-[10px] uppercase font-bold transition-colors"
+                  >
+                    {copied ? "Copied!" : "Copy Mail"}
+                  </button>
+                  <a 
+                    href={`mailto:${adminEmail}`}
+                    className="flex-1 bg-neon-green text-black hover:bg-white py-1 rounded text-[10px] uppercase font-bold transition-colors text-center"
+                  >
+                    Send
+                  </a>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </motion.div>
       
       {/* Main Container */}
@@ -693,25 +734,37 @@ export default function App() {
               { name: "Instagram", icon: <Instagram className="w-5 h-5" />, color: "bg-[#e4405f]", link: "https://www.instagram.com/sadat_hossain_369/" },
               { name: "TikTok", icon: <Music className="w-5 h-5" />, color: "bg-[#000000] border border-white/20", link: "https://www.tiktok.com/@sadat_hossain_369?lang=en" },
               { name: "YouTube", icon: <Youtube className="w-5 h-5" />, color: "bg-[#ff0000]", link: "https://www.youtube.com/@crazysadat" },
-              { name: "Email Admin", icon: <Mail className="w-5 h-5" />, color: "bg-neon-green/20 text-neon-green border border-neon-green/30", link: "mailto:sadat310710@gmail.com" }
-            ].map((social, idx) => (
-              <motion.a
-                key={idx}
-                href={social.link}
-                target={social.link.startsWith('mailto:') ? undefined : "_blank"}
-                rel={social.link.startsWith('mailto:') ? undefined : "noopener noreferrer"}
-                whileHover={{ scale: 1.02, x: 5 }}
-                className="flex items-center justify-between p-3 rounded-lg terminal-border bg-terminal-bg/50 group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-md ${social.color} text-white`}>
-                    {social.icon}
-                  </div>
-                  <span className="font-bold text-xs text-white group-hover:text-neon-green transition-colors">{social.name}</span>
-                </div>
-                <ExternalLink className="w-3 h-3 text-white/20 group-hover:text-neon-green transition-colors" />
-              </motion.a>
-            ))}
+              { 
+                name: "Email Admin", 
+                icon: <Mail className="w-5 h-5" />, 
+                color: "bg-neon-green/20 text-neon-green border border-neon-green/30", 
+                onClick: () => setShowEmail(true) 
+              }
+            ].map((social, idx) => {
+              const Component = (social as any).onClick ? 'button' : 'a';
+              return (
+                <motion.div
+                  key={idx}
+                  whileHover={{ scale: 1.02, x: 5 }}
+                >
+                  <Component
+                    href={(social as any).link}
+                    onClick={(social as any).onClick}
+                    target={(social as any).link?.startsWith('mailto:') ? undefined : "_blank"}
+                    rel={(social as any).link?.startsWith('mailto:') ? undefined : "noopener noreferrer"}
+                    className="flex items-center justify-between p-3 rounded-lg terminal-border bg-terminal-bg/50 group w-full text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-md ${social.color} text-white`}>
+                        {social.icon}
+                      </div>
+                      <span className="font-bold text-xs text-white group-hover:text-neon-green transition-colors">{social.name}</span>
+                    </div>
+                    <ExternalLink className="w-3 h-3 text-white/20 group-hover:text-neon-green transition-colors" />
+                  </Component>
+                </motion.div>
+              );
+            })}
           </div>
         </section>
 
